@@ -3,24 +3,24 @@
 
 (defn arr-sort [x] (sorted x (fn [x y] (< (hash x) (hash y)))))
 
-(deftest order_balance
+(deftest split_balance
   (assert-deep-equal
     {:crediters @[["karl" 10] ["john" 100]] :debiters @[["peter" -50] ["valentina" -60]]}
-    (let [res (debts/order_balance @{"karl" 10 "peter" -50 "john" 100 "valentina" -60})]
+    (let [res (debts/split_balance @{"karl" 10 "peter" -50 "john" 100 "valentina" -60})]
       {:crediters (arr-sort (res :crediters)) :debiters (arr-sort (res :debiters))})))
 
-(deftest check_balance
-  (debts/check_balance @[["karl" 10] ["john" 100]] @[["valentina" -60] ["peter" -50]]))
+(deftest check_balance_solvable
+  (debts/check_balance_solvable @[["karl" 10] ["john" 100]] @[["valentina" -60] ["peter" -50]]))
 
-(deftest check_balance_error
+(deftest check_balance_solvable_error
   (assert-thrown-message
     "Unsolvable balance"
-    (debts/check_balance @[["karl" 10] ["john" 150]] @[["valentina" -60] ["peter" -50]] )))
+    (debts/check_balance_solvable @[["karl" 10] ["john" 150]] @[["valentina" -60] ["peter" -50]] )))
 
-(deftest reduce_balance
+(deftest solve_balance
   (assert-deep-equal
     (arr-sort @[["valentina" 60 "john"] ["peter" 40 "john"] ["peter" 10 "karl"]])
-    (arr-sort (debts/reduce_balance @[["valentina" -60] ["peter" -50]] @[["karl" 10] ["john" 100]]))))
+    (arr-sort (debts/solve_balance @[["valentina" -60] ["peter" -50]] @[["karl" 10] ["john" 100]]))))
 
 (deftest settle1
   (assert-deep-equal
@@ -66,10 +66,7 @@
   #               ["ter-ter" 298.33 "simon"]
   #               ["valentin" 445.90 "simon"]]))
   (do
-    (def order_balanced (debts/order_balance balance))
-    (def bank @{})
-    (each item (array ;(order_balanced :debiters) ;(order_balanced :crediters))
-      (put bank (item 0) (item 1)))
+    (def bank (table/clone balance))
     (def solution (debts/settle balance))
     (each step solution
       (+= (bank (step 0)) (step 1))

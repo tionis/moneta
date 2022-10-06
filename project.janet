@@ -10,13 +10,3 @@
 
 (declare-source
   :source ["moneta"])
-
-#(declare-native
-# :name "mynative"
-# :source ["mynative.c" "mysupport.c"]
-# :embedded ["extra-functions.janet"])
-
-(declare-executable
-  :name "moneta"
-  :entry "moneta/cli.janet"
-  :install true)
